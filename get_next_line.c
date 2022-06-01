@@ -2,66 +2,112 @@
 
 char	*get_next_line(int fd)
 {
-	static char		*buffer;
+	static char		*trash;
+	char			*buffer;
 	char			*line;
 	char			*temp;
-	unsigned int	index;
-	size_t			size_read;
+	int			size_read;
 
+	if (fd < 0)
+		return (NULL);
 	line = NULL;
-	if (buffer)
-	{
-		line = treat_trash(buffer);
-		printf("GNLbuffer: %s, line: %s\n", buffer, line);
-		return (line);
-	}
-
-
 	temp = NULL;
-	index = 0;
-	size_read = -2;
-	while (size_read)
+	buffer = NULL;
+	if (trash)
 	{
-		buffer = (char *)ft_calloc(BUFFER_SIZE, sizeof(char));
-		size_read = read(fd, buffer, BUFFER_SIZE);
-		buffer[size_read] = '\0';
-		if (next_nl(buffer))
+		if (next_nl(trash))
 		{
-			temp = ft_substr(buffer, 0, next_nl(buffer) + 1);
-			line = ft_strjoin(line, temp);
-			buffer = ft_substr(buffer, ft_strlen(temp), ft_strlen(&buffer[ft_strlen(temp)]));
+			buffer = trash;
+			temp = ft_substr(buffer, 0, end_line(buffer) + 1);
+			trash = ft_substr(buffer, ft_strlen(temp), ft_strlen(&buffer[ft_strlen(temp)]));
+			free(buffer);
+			buffer = NULL;
+			line = ft_substr(temp, 0, ft_strlen(temp));
 			free(temp);
+			temp = NULL;
 			return (line);
 		}
 		else
-			line = ft_strjoin(line, buffer);
-		free(buffer);
-	}
-	return (line);
-}
-
-char	*treat_trash(char *buffer)
-{
-	char			*line;
-	unsigned int	index;
-
-	index = 0;
-	line = NULL;
-	while (buffer[index])
-	{
-		if (buffer[index] == '\n')
 		{
+			buffer = line;
+			line = ft_substr(trash, 0, ft_strlen(trash));
+			free(trash);
+			trash = NULL;
+		}
+	}
+
+	size_read = -2;
+	while (size_read)
+	{
+		buffer = (char *)malloc(BUFFER_SIZE * sizeof(char));
+		size_read = read(fd, buffer, BUFFER_SIZE);
+		buffer[size_read] = '\0';
+		if (size_read == -1 || !buffer)
+		{
+			free(buffer);
+			return (NULL);
+		}
+		if (next_nl(buffer))
+		{
+			temp = ft_substr(buffer, 0, end_line(buffer) + 1);
+			trash = ft_substr(buffer, ft_strlen(temp), ft_strlen(&buffer[ft_strlen(temp)]));
+			free(buffer);
+			buffer = NULL;
+			buffer = line;
 			if (!line)
 			{
-				line = ft_substr(buffer, index + 1, end_line(&buffer[index + 1]) + 1);
-				buffer = ft_substr(buffer, ft_strlen(line) + 1, BUFFER_SIZE);
-				return (line);
+				line = ft_substr(temp, 0, ft_strlen(temp));
+				free(temp);
+				temp = NULL;
+			}
+			else
+				line = ft_strjoin(line, temp);
+			free(temp);
+			temp = NULL;
+			free(buffer);
+			buffer = NULL;
+			return (line);
+		}
+		else
+		{
+			if (!line)
+				line = ft_substr(buffer, 0, ft_strlen(buffer));
+			else
+			{
+				temp = line;
+				line = ft_strjoin(line, buffer);
+				free(temp);
+				temp = NULL;
 			}
 		}
-		index++;
+		free(buffer);
+		buffer = NULL;
 	}
 	return (line);
 }
+
+// char	*treat_trash(char *buffer)
+// {
+// 	char			*line;
+// 	unsigned int	index;
+
+// 	index = 0;
+// 	line = NULL;
+// 	while (buffer[index])
+// 	{
+// 		if (buffer[index] == '\n')
+// 		{
+// 			if (!line)
+// 			{
+// 				line = ft_substr(buffer, index + 1, end_line(&buffer[index + 1]) + 1);
+// 				buffer = ft_substr(buffer, ft_strlen(line) + 1, BUFFER_SIZE);
+// 				return (line);
+// 			}
+// 		}
+// 		index++;
+// 	}
+// 	return (line);
+// }
 
 char	*ft_strjoin(char const *s1, char const *s2)
 {
@@ -145,15 +191,19 @@ char	*ft_substr(char const *str, unsigned int start, size_t len)
 size_t	next_nl(char *buffer)
 {
 	int	index;
+	int	true;
+	int false;
 
 	index = 0;
-	while (buffer[index])
+	false = 0;
+	true = 1;
+	while (buffer[index] != '\n')
 	{
-		if (buffer[index] == '\n')
-			return (index);
+		if (!buffer[index])
+			return (false);
 		index++;
 	}
-	return (0);
+	return (true);
 }
 
 size_t	end_line(char *buffer)
@@ -166,24 +216,3 @@ size_t	end_line(char *buffer)
 	return (index);
 }
 
-void	*ft_calloc(size_t count, size_t size)
-{
-	void		*ptr;
-	size_t		delete;
-
-	ptr = malloc(count * size);
-	if (ptr == NULL)
-		return (NULL);
-	delete = count * size;
-	ft_bzero(ptr, delete);
-	return (ptr);
-}
-
-void	ft_bzero(void *dest, size_t len)
-{
-	unsigned char	*ptr;
-
-	ptr = dest;
-	while (len-- > 0)
-		*ptr++ = 0;
-}

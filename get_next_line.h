@@ -6,13 +6,13 @@
 /*   By: rwallier <rwallier@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/05/29 13:10:34 by rwallier          #+#    #+#             */
-/*   Updated: 2022/05/29 17:27:52 by rwallier         ###   ########.fr       */
+/*   Updated: 2022/05/31 15:50:53 by rwallier         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef GET_NEXT_LINE_H
 #define GET_NEXT_LINE_H
-# define BUFFER_SIZE 5
+// # define BUFFER_SIZE 5
 #include <unistd.h>
 #include <stdlib.h>
 #include <stdio.h>
