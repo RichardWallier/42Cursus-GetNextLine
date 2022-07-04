@@ -1,5 +1,5 @@
 # GetNextLine
-## its a function to read content line by line, guided by a BUFFER_SIZE
+## it`s a function to read content line by line, guided by a BUFFER_SIZE
 ### Usage
 ``make`` without bonus functions.
 
